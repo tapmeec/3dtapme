@@ -6,6 +6,13 @@
     <title>Demo Interactiva NFC - Tap Me</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
+        /* Fondo difuminado estilo fuego y morado que se funde con el blanco */
+        body {
+            background: radial-gradient(circle at 15% 20%, rgba(255, 107, 53, 0.22) 0%, transparent 40%),
+                        radial-gradient(circle at 85% 80%, rgba(123, 104, 238, 0.25) 0%, transparent 45%),
+                        linear-gradient(135deg, rgba(255, 140, 66, 0.15) 0%, rgba(123, 104, 238, 0.18) 50%, #ffffff 100%);
+        }
+
         /* Animación ultra realista centrada de la tarjeta NFC acercándose al teléfono */
         @keyframes realisticCardEntry {
             0% { transform: translate(220px, 120px) rotate(18deg) scale(0.85); opacity: 0; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
@@ -29,7 +36,7 @@
         @keyframes moveAndClick {
             0% { transform: translate(0px, 40px) scale(0.8); opacity: 0; }
             20% { transform: translate(0px, 0px) scale(1); opacity: 1; }
-            50% { transform: translate(0px, 0px) scale(1.2); background: rgba(255, 255, 255, 0.9); box-shadow: 0 0 15px rgba(255,255,255,0.9); }
+            50% { transform: translate(0px, 0px) scale(1.2); background: rgba(123, 104, 238, 0.9); box-shadow: 0 0 15px rgba(123,104,238,0.5); }
             80% { transform: translate(0px, 0px) scale(1); opacity: 1; }
             100% { transform: translate(0px, 20px) scale(0.8); opacity: 0; }
         }
@@ -37,8 +44,8 @@
         .animated-cursor {
             width: 36px;
             height: 36px;
-            background: rgba(255, 255, 255, 0.7);
-            border: 2px solid #7b68ee;
+            background: rgba(123, 104, 238, 0.7);
+            border: 2px solid #ffffff;
             border-radius: 50%;
             position: absolute;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -60,15 +67,15 @@
 
         .phone-container {
             transform: perspective(1000px) rotateY(-8deg) rotateX(4deg);
-            box-shadow: -25px 25px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(123, 104, 238, 0.2);
+            box-shadow: -25px 25px 50px rgba(0, 0, 0, 0.2), 0 0 30px rgba(123, 104, 238, 0.15);
         }
     </style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex flex-col items-center justify-center p-6 overflow-x-hidden">
+<body class="min-h-screen flex flex-col items-center justify-center p-6 overflow-x-hidden">
 
     <header class="text-center mb-4">
-        <h1 class="text-2xl font-extrabold tracking-tight text-purple-400 mb-1">Tap Me - Demostración NFC</h1>
-        <p class="text-slate-400 text-xs">Presentación interactiva y limpia</p>
+        <h1 class="text-2xl font-extrabold tracking-tight text-purple-700 mb-1">Tap Me - Demostración NFC</h1>
+        <p class="text-slate-600 text-xs">Presentación interactiva y limpia</p>
     </header>
 
     <!-- CONTENEDOR PRINCIPAL -->
@@ -83,7 +90,7 @@
             </div>
 
             <!-- MOCKUP 3D DEL TELÉFONO -->
-            <div class="phone-container relative w-[300px] h-[600px] bg-black rounded-[48px] p-3 border-4 border-slate-700 z-20">
+            <div class="phone-container relative w-[300px] h-[600px] bg-slate-900 rounded-[48px] p-3 border-4 border-slate-300 z-20">
                 <div class="absolute top-5 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-full z-40 border border-slate-800 flex items-center justify-center">
                     <div class="w-3 h-3 rounded-full bg-slate-900 mr-2"></div>
                     <div class="w-2 h-2 rounded-full bg-slate-950"></div>
@@ -98,18 +105,18 @@
         </div>
 
         <!-- PANEL DE ESTADO Y CONTROLES -->
-        <div class="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between shadow-xl">
+        <div class="w-full max-w-xs bg-white/85 border border-purple-200/60 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between shadow-xl">
             <div>
-                <span class="text-[10px] uppercase tracking-widest text-purple-400 font-bold">Estado Actual</span>
-                <h3 id="currentTitle" class="text-base font-bold mt-2 text-white">Iniciando...</h3>
-                <p id="currentDesc" class="text-slate-400 text-xs mt-2 leading-relaxed">Cargando demostración interactiva.</p>
+                <span class="text-[10px] uppercase tracking-widest text-purple-600 font-bold">Estado Actual</span>
+                <h3 id="currentTitle" class="text-base font-bold mt-2 text-slate-900">Iniciando...</h3>
+                <p id="currentDesc" class="text-slate-600 text-xs mt-2 leading-relaxed">Cargando demostración interactiva.</p>
             </div>
 
-            <div class="mt-8 pt-4 border-t border-slate-800 flex flex-col gap-2.5">
-                <button onclick="restartDemo()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all cursor-pointer w-full shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2">
+            <div class="mt-8 pt-4 border-t border-purple-100 flex flex-col gap-2.5">
+                <button onclick="restartDemo()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all cursor-pointer w-full shadow-lg shadow-purple-200 flex items-center justify-center gap-2">
                     <span>🔄</span> Reiniciar Interacción Completa
                 </button>
-                <button id="playPauseBtn" onclick="togglePlay()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full border border-purple-500/30">
+                <button id="playPauseBtn" onclick="togglePlay()" class="bg-white hover:bg-slate-50 text-purple-700 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full border border-purple-200 shadow-sm">
                     Pausar Demo
                 </button>
             </div>
@@ -124,12 +131,12 @@
                 desc: "Se aproxima la tarjeta física Tap Me al dispositivo.",
                 showCard: true,
                 screenHTML: `
-                    <div class="flex flex-col items-center justify-center h-full space-y-3 bg-slate-950 p-6 w-full">
+                    <div class="flex flex-col items-center justify-center h-full space-y-3 bg-slate-950 p-6 w-full text-white">
                         <div class="w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
                             <span class="text-2xl">📱</span>
                         </div>
                         <div class="text-purple-400 font-bold text-xs">Esperando Proximidad</div>
-                        <div class="text-slate-500 text-xs px-4">Acercando tarjeta al dispositivo...</div>
+                        <div class="text-slate-400 text-xs px-4">Acercando tarjeta al dispositivo...</div>
                     </div>
                 `
             },
@@ -138,7 +145,7 @@
                 desc: "Aparece la alerta flotante del enlace web. El cursor se desliza y pulsa.",
                 showCard: false,
                 screenHTML: `
-                    <div class="w-full h-full bg-slate-950 relative flex flex-col items-center justify-center p-6">
+                    <div class="w-full h-full bg-slate-950 relative flex flex-col items-center justify-center p-6 text-white">
                         <div class="absolute top-10 left-4 right-4 bg-slate-900/95 border border-purple-500/60 p-3.5 rounded-2xl shadow-2xl backdrop-blur-md text-left z-40">
                             <div class="flex items-center space-x-2">
                                 <span class="text-base">🌐</span>
