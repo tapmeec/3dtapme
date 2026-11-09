@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Interactiva NFC - Tap Me</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Animación ultra realista de la tarjeta NFC física acercándose al teléfono */
+        @keyframes realisticCardEntry {
+            0% { transform: translate(220px, 180px) rotate(18deg) scale(0.85); opacity: 0; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
+            25% { transform: translate(130px, 90px) rotate(8deg) scale(0.92); opacity: 1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4)); }
+            65% { transform: translate(15px, -170px) rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
+            85% { transform: translate(15px, -170px) rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
+            100% { transform: translate(120px, 40px) rotate(6deg) scale(0.9); opacity: 0; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
+        }
+
+        .nfc-card-realistic {
+            animation: realisticCardEntry 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            /* Proporción exacta de tarjeta física (Aspect Ratio ~1.58) */
+            width: 240px;
+            height: 152px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7), 0 0 15px rgba(123,104,238,0.3);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        /* Cursor deslizándose hacia cada botón con total fluidez */
+        @keyframes moveAndClick {
+            0% { transform: translate(0px, 40px) scale(0.8); opacity: 0; }
+            20% { transform: translate(0px, 0px) scale(1); opacity: 1; }
+            50% { transform: translate(0px, 0px) scale(1.2); background: rgba(255, 255, 255, 0.9); box-shadow: 0 0 15px rgba(255,255,255,0.9); }
+            80% { transform: translate(0px, 0px) scale(1); opacity: 1; }
+            100% { transform: translate(0px, 20px) scale(0.8); opacity: 0; }
+        }
+
+        .animated-cursor {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid #7b68ee;
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: moveAndClick 2.2s infinite ease-in-out;
+            z-index: 50;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .animated-cursor::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .phone-container {
+            transform: perspective(1000px) rotateY(-8deg) rotateX(4deg);
+            box-shadow: -25px 25px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(123, 104, 238, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col items-center justify-center p-6 overflow-x-hidden">
+
+    <header class="text-center mb-6">
+        <h1 class="text-3xl font-extrabold tracking-tight text-purple-400 mb-1">Tap Me - Demostración NFC</h1>
+        <p class="text-slate-400 text-sm">Flujo pausado, natural y con tarjeta física hiperrealista</p>
+    </header>
+
+    <div class="flex flex-col xl:flex-row items-center justify-center gap-12 max-w-6xl w-full">
+        
+        <!-- PASOS LATERALES -->
+        <div id="stepsList" class="flex flex-col gap-1.5 w-full max-w-xs max-h-[580px] overflow-y-auto pr-2">
+            <span class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Secuencia en Vivo</span>
+        </div>
+
+        <!-- CENTRO: TELÉFONO + TARJETA -->
+        <div class="relative py-10 px-8 flex items-center justify-center">
+            
+            <!-- TARJETA NFC REALISTA -->
+            <div id="cardContainer" class="absolute z-30 pointer-events-none hidden">
+                <img src="tarjetatapme.png" alt="Tarjeta Tap Me" class="nfc-card-realistic object-cover">
+            </div>
+
+            <!-- MOCKUP 3D DEL TELÉFONO -->
+            <div class="phone-container relative w-[310px] h-[620px] bg-black rounded-[48px] p-3 border-4 border-slate-700 z-20">
+                <div class="absolute top-5 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-full z-40 border border-slate-800 flex items-center justify-center">
+                    <div class="w-3 h-3 rounded-full bg-slate-900 mr-2"></div>
+                    <div class="w-2 h-2 rounded-full bg-slate-950"></div>
+                </div>
+                
+                <div class="w-full h-full bg-slate-900 rounded-[38px] overflow-hidden relative flex flex-col">
+                    <div id="screenContent" class="w-full h-full flex flex-col items-center justify-center text-center transition-all duration-300 relative">
+                        <!-- Contenido dinámico -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE CONTROL Y REINICIO -->
+        <div class="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] uppercase tracking-widest text-purple-400 font-bold">Estado Actual</span>
+                <h3 id="currentTitle" class="text-base font-bold mt-2 text-white">Iniciando...</h3>
+                <p id="currentDesc" class="text-slate-400 text-xs mt-2 leading-relaxed">Cargando demostración interactiva.</p>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-800 flex flex-col gap-2">
+                <button onclick="restartDemo()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2">
+                    <span>🔄</span> Reiniciar Interacción Completa
+                </button>
+                <button id="playPauseBtn" onclick="togglePlay()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer w-full border border-purple-500/30">
+                    Pausar Demo
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const flowSteps = [
+            {
+                title: "1. Acercar Tarjeta NFC",
+                desc: "Se aproxima la tarjeta física Tap Me al dispositivo.",
+                showCard: true,
+                screenHTML: `
+                    <div class="flex flex-col items-center justify-center h-full space-y-3 bg-slate-950 p-6 w-full">
+                        <div class="w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+                            <span class="text-2xl">📱</span>
+                        </div>
+                        <div class="text-purple-400 font-bold text-xs">Esperando Proximidad</div>
+                        <div class="text-slate-500 text-xs px-4">Acercando tarjeta al dispositivo...</div>
+                    </div>
+                `
+            },
+            {
+                title: "2. Tocar Notificación NFC",
+                desc: "Aparece la alerta flotante del enlace web. El cursor se desliza y pulsa.",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-slate-950 relative flex flex-col items-center justify-center p-6">
+                        <div class="absolute top-10 left-4 right-4 bg-slate-900/95 border border-purple-500/60 p-3.5 rounded-2xl shadow-2xl backdrop-blur-md text-left z-40">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-base">🌐</span>
+                                <div>
+                                    <div class="text-[10px] text-purple-400 font-bold uppercase tracking-wider">Etiqueta NFC de sitio web</div>
+                                    <div class="text-xs font-semibold text-white">Abrir enlace en Safari</div>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-[11px] text-purple-300 font-medium bg-purple-950/50 px-2 py-1 rounded-lg text-center border border-purple-500/30">
+                                👆 Toca el enlace para entrar
+                            </div>
+                        </div>
+                        <div class="animated-cursor" style="top: 15%; left: 50%;"></div>
+                    </div>
+                `
+            },
+            {
+                title: "3. Link-in-Bio Principal",
+                desc: "Se abre tu página principal. El cursor se desplaza hacia 'Guardar Contacto'.",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="vistapreviatapme.png" alt="Vista Principal" class="w-full h-full object-cover">
+                        <div class="animated-cursor" style="top: 44%; left: 50%;"></div>
+                    </div>
+                `
+            },
+            {
+                title: "4. Guardar Contacto (VCard)",
+                desc: "Se despliega la vista de contacto (vistacontacto.png).",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="vistacontacto.png" alt="Vista Contacto" class="w-full h-full object-cover">
+                    </div>
+                `
+            },
+            {
+                title: "5. Retorno a Página Principal",
+                desc: "Regresa al menú principal. El cursor se desplaza hacia 'WhatsApp'.",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="vistapreviatapme.png" alt="Vista Principal" class="w-full h-full object-cover">
+                        <div class="animated-cursor" style="top: 52%; left: 50%;"></div>
+                    </div>
+                `
+            },
+            {
+                title: "6. Chat de WhatsApp",
+                desc: "Se abre el chat configurado (vistawhatsapp.jpg).",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="vistawhatsapp.jpg" alt="Vista WhatsApp" class="w-full h-full object-cover">
+                    </div>
+                `
+            },
+            {
+                title: "7. Retorno a Página Principal",
+                desc: "Regresa al menú principal. El cursor se desplaza hacia 'Reseña de Google'.",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="vistapreviatapme.png" alt="Vista Principal" class="w-full h-full object-cover">
+                        <div class="animated-cursor" style="top: 62%; left: 50%;"></div>
+                    </div>
+                `
+            },
+            {
+                title: "8. Reseña de Google",
+                desc: "Se visualiza la pantalla de calificaciones (resenagoogle.jpg).",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="resenagoogle.jpg" alt="Reseña Google" class="w-full h-full object-cover">
+                    </div>
+                `
+            },
+            {
+                title: "9. Retorno a Página Principal",
+                desc: "Regresa al menú principal. El cursor se desplaza hacia 'Redes Sociales'.",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="vistapreviatapme.png" alt="Vista Principal" class="w-full h-full object-cover">
+                        <div class="animated-cursor" style="top: 72%; left: 50%;"></div>
+                    </div>
+                `
+            },
+            {
+                title: "10. Redes Sociales",
+                desc: "Se muestra vistaredsocial.png con Instagram y TikTok.",
+                showCard: false,
+                screenHTML: `
+                    <div class="w-full h-full bg-[#7b68ee] relative flex flex-col overflow-hidden">
+                        <img src="vistaredsocial.png" alt="Vista Social" class="w-full h-full object-cover">
+                    </div>
+                `
+            }
+        ];
+
+        // Generar lista lateral
+        const stepsListEl = document.getElementById("stepsList");
+        flowSteps.forEach((step, idx) => {
+            stepsListEl.innerHTML += `
+                <div id="step-${idx}" class="step-indicator p-2 rounded-xl bg-slate-900/60 border border-slate-800 transition-all duration-300 opacity-60">
+                    <div class="text-purple-400 font-bold text-[9px] uppercase">Paso ${idx + 1}</div>
+                    <div class="text-[11px] font-semibold text-white">${step.title.split('. ')[1]}</div>
+                </div>
+            `;
+        });
+
+        let currentStep = 0;
+        let isPlaying = true;
+        let intervalId = null;
+        const stepTime = 4200; // ¡Tiempo ampliado a 4.2 segundos por paso para que sea totalmente pausado y natural!
+
+        function updateDemo() {
+            const step = flowSteps[currentStep];
+            
+            document.getElementById("currentTitle").innerText = step.title;
+            document.getElementById("currentDesc").innerText = step.desc;
+            document.getElementById("screenContent").innerHTML = step.screenHTML;
+
+            const cardContainer = document.getElementById("cardContainer");
+            if (step.showCard) {
+                cardContainer.classList.remove("hidden");
+                const img = cardContainer.querySelector("img");
+                img.style.animation = 'none';
+                img.offsetHeight;
+                img.style.animation = 'realisticCardEntry 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+            } else {
+                cardContainer.classList.add("hidden");
+            }
+
+            for (let i = 0; i < flowSteps.length; i++) {
+                const el = document.getElementById(`step-${i}`);
+                if (i === currentStep) {
+                    el.className = "step-indicator p-2 rounded-xl bg-purple-950/40 border border-purple-500/50 transition-all duration-300 opacity-100";
+                } else {
+                    el.className = "step-indicator p-2 rounded-xl bg-slate-900/60 border border-slate-800 transition-all duration-300 opacity-60";
+                }
+            }
+
+            currentStep = (currentStep + 1) % flowSteps.length;
+        }
+
+        function startLoop() {
+            updateDemo();
+            intervalId = setInterval(updateDemo, stepTime);
+        }
+
+        function restartDemo() {
+            clearInterval(intervalId);
+            currentStep = 0;
+            startLoop();
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById("playPauseBtn");
+            if (isPlaying) {
+                startLoop();
+                btn.innerText = "Pausar Demo";
+            } else {
+                clearInterval(intervalId);
+                btn.innerText = "Reanudar Demo";
+            }
+        }
+
+        startLoop();
+    </script>
+</body>
+</html>
