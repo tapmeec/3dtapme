@@ -6,18 +6,17 @@
     <title>Demo Interactiva NFC - Tap Me</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* Animación ultra realista de la tarjeta NFC física acercándose al teléfono */
+        /* Animación ultra realista centrada de la tarjeta NFC acercándose al teléfono */
         @keyframes realisticCardEntry {
-            0% { transform: translate(220px, 180px) rotate(18deg) scale(0.85); opacity: 0; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
-            25% { transform: translate(130px, 90px) rotate(8deg) scale(0.92); opacity: 1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4)); }
-            65% { transform: translate(15px, -170px) rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
-            85% { transform: translate(15px, -170px) rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
-            100% { transform: translate(120px, 40px) rotate(6deg) scale(0.9); opacity: 0; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
+            0% { transform: translate(220px, 120px) rotate(18deg) scale(0.85); opacity: 0; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
+            25% { transform: translate(120px, 60px) rotate(8deg) scale(0.92); opacity: 1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4)); }
+            65% { transform: translate(10px, -110px) rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
+            85% { transform: translate(10px, -110px) rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 25px 35px rgba(0,0,0,0.6)); }
+            100% { transform: translate(100px, 20px) rotate(6deg) scale(0.9); opacity: 0; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
         }
 
         .nfc-card-realistic {
             animation: realisticCardEntry 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            /* Proporción exacta de tarjeta física (Aspect Ratio ~1.58) */
             width: 240px;
             height: 152px;
             border-radius: 12px;
@@ -67,28 +66,24 @@
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex flex-col items-center justify-center p-6 overflow-x-hidden">
 
-    <header class="text-center mb-6">
-        <h1 class="text-3xl font-extrabold tracking-tight text-purple-400 mb-1">Tap Me - Demostración NFC</h1>
-        <p class="text-slate-400 text-sm">Flujo pausado, natural y con tarjeta física hiperrealista</p>
+    <header class="text-center mb-4">
+        <h1 class="text-2xl font-extrabold tracking-tight text-purple-400 mb-1">Tap Me - Demostración NFC</h1>
+        <p class="text-slate-400 text-xs">Presentación interactiva y limpia</p>
     </header>
 
-    <div class="flex flex-col xl:flex-row items-center justify-center gap-12 max-w-6xl w-full">
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="flex flex-col lg:flex-row items-center justify-center gap-10 max-w-4xl w-full">
         
-        <!-- PASOS LATERALES -->
-        <div id="stepsList" class="flex flex-col gap-1.5 w-full max-w-xs max-h-[580px] overflow-y-auto pr-2">
-            <span class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Secuencia en Vivo</span>
-        </div>
-
         <!-- CENTRO: TELÉFONO + TARJETA -->
-        <div class="relative py-10 px-8 flex items-center justify-center">
+        <div class="relative py-4 px-4 flex items-center justify-center">
             
-            <!-- TARJETA NFC REALISTA -->
-            <div id="cardContainer" class="absolute z-30 pointer-events-none hidden">
+            <!-- TARJETA NFC REALISTA (Centrada exactamente respecto al teléfono) -->
+            <div id="cardContainer" class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none hidden">
                 <img src="tarjetatapme.png" alt="Tarjeta Tap Me" class="nfc-card-realistic object-cover">
             </div>
 
             <!-- MOCKUP 3D DEL TELÉFONO -->
-            <div class="phone-container relative w-[310px] h-[620px] bg-black rounded-[48px] p-3 border-4 border-slate-700 z-20">
+            <div class="phone-container relative w-[300px] h-[600px] bg-black rounded-[48px] p-3 border-4 border-slate-700 z-20">
                 <div class="absolute top-5 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-full z-40 border border-slate-800 flex items-center justify-center">
                     <div class="w-3 h-3 rounded-full bg-slate-900 mr-2"></div>
                     <div class="w-2 h-2 rounded-full bg-slate-950"></div>
@@ -102,19 +97,19 @@
             </div>
         </div>
 
-        <!-- PANEL DE CONTROL Y REINICIO -->
-        <div class="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between">
+        <!-- PANEL DE ESTADO Y CONTROLES -->
+        <div class="w-full max-w-xs bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between shadow-xl">
             <div>
                 <span class="text-[10px] uppercase tracking-widest text-purple-400 font-bold">Estado Actual</span>
                 <h3 id="currentTitle" class="text-base font-bold mt-2 text-white">Iniciando...</h3>
                 <p id="currentDesc" class="text-slate-400 text-xs mt-2 leading-relaxed">Cargando demostración interactiva.</p>
             </div>
 
-            <div class="mt-6 pt-4 border-t border-slate-800 flex flex-col gap-2">
-                <button onclick="restartDemo()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2">
+            <div class="mt-8 pt-4 border-t border-slate-800 flex flex-col gap-2.5">
+                <button onclick="restartDemo()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs px-4 py-3 rounded-xl transition-all cursor-pointer w-full shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2">
                     <span>🔄</span> Reiniciar Interacción Completa
                 </button>
-                <button id="playPauseBtn" onclick="togglePlay()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer w-full border border-purple-500/30">
+                <button id="playPauseBtn" onclick="togglePlay()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer w-full border border-purple-500/30">
                     Pausar Demo
                 </button>
             </div>
@@ -246,21 +241,10 @@
             }
         ];
 
-        // Generar lista lateral
-        const stepsListEl = document.getElementById("stepsList");
-        flowSteps.forEach((step, idx) => {
-            stepsListEl.innerHTML += `
-                <div id="step-${idx}" class="step-indicator p-2 rounded-xl bg-slate-900/60 border border-slate-800 transition-all duration-300 opacity-60">
-                    <div class="text-purple-400 font-bold text-[9px] uppercase">Paso ${idx + 1}</div>
-                    <div class="text-[11px] font-semibold text-white">${step.title.split('. ')[1]}</div>
-                </div>
-            `;
-        });
-
         let currentStep = 0;
         let isPlaying = true;
         let intervalId = null;
-        const stepTime = 4200; // ¡Tiempo ampliado a 4.2 segundos por paso para que sea totalmente pausado y natural!
+        const stepTime = 4200;
 
         function updateDemo() {
             const step = flowSteps[currentStep];
@@ -278,15 +262,6 @@
                 img.style.animation = 'realisticCardEntry 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards';
             } else {
                 cardContainer.classList.add("hidden");
-            }
-
-            for (let i = 0; i < flowSteps.length; i++) {
-                const el = document.getElementById(`step-${i}`);
-                if (i === currentStep) {
-                    el.className = "step-indicator p-2 rounded-xl bg-purple-950/40 border border-purple-500/50 transition-all duration-300 opacity-100";
-                } else {
-                    el.className = "step-indicator p-2 rounded-xl bg-slate-900/60 border border-slate-800 transition-all duration-300 opacity-60";
-                }
             }
 
             currentStep = (currentStep + 1) % flowSteps.length;
